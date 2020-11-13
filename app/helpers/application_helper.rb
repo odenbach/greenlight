@@ -55,13 +55,6 @@ module ApplicationHelper
     @fallback_translations[I18n.default_locale]
   end
 
-  # Returns the page that the logo redirects to when clicked on
-  def home_page
-    return admins_path if current_user.has_role? :super_admin
-    return current_user.main_room if current_user.role.get_permission("can_create_rooms")
-    cant_create_rooms_path
-  end
-
   # Returns 'active' if the current page is the users home page (used to style header)
   def active_home
     home_actions = %w[show cant_create_rooms]
@@ -123,5 +116,23 @@ module ApplicationHelper
     end
   rescue
     false
+  end
+
+  # Specifies which title should be the tab title and returns original string
+  def title(page_title)
+    # Only set the content_for if not already set on the page so that only the first title appears as the tab title
+    content_for(:page_title) { page_title } if content_for(:page_title).blank?
+    page_title
+  end
+
+  # Indicates whether the recording tables should be hidden
+  def hide_recording_tables
+    return false unless recording_consent_required?
+    @settings.get_value("Room Configuration Recording") == "disabled"
+  end
+
+  # Hide the signin buttons if there is an error on the page
+  def show_signin
+    !@hide_signin.present?
   end
 end
